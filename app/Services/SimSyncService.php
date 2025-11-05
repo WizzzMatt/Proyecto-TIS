@@ -125,7 +125,7 @@ class SimSyncService
                                 ->orderByDesc('fecha_nota')
                                 ->first();
 
-                $sem = $simAlu?->semestre_inscrito; // puede ser null si no existe en sim
+                $sem = $simAlu?->semestre_inscrito;
                 $nota = $simNota->nota_final ?? null;
                 $fNota = $simNota->fecha_nota ?? null;
 
