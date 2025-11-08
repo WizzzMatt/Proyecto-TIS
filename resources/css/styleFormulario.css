@@ -1,0 +1,136 @@
+/* --- Variables de Color --- */
+:root {
+    --primary-red: #8B0000;
+    --secondary-red: #A52A2A;
+    --light-red-bg: #FDF5F5;
+    --border-color: #D3BDBD;
+    --text-color: #333;
+    --helper-text-color: #004a9b;
+    --readonly-bg: #F0F0F0;
+    --white: #FFFFFF;
+    --update-flash-color: #FFF3CD; /* Un amarillo pálido para el destello */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* El contenedor */
+.form-container {
+    background-color: var(--white);
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 600px;
+    border-top: 5px solid var(--primary-red);
+}
+
+h1 {
+    color: var(--primary-red);
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+.form-container p {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #666;
+}
+
+/* Los campos*/
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="number"],
+input[list],
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--secondary-red);
+    box-shadow: 0 0 5px rgba(139, 0, 0, 0.2);
+}
+
+/* Estilos de cada campo */
+input[readonly] {
+    background-color: var(--readonly-bg);
+    cursor: not-allowed;
+    color: #555;
+}
+
+.semestre-group {
+    display: flex;
+    gap: 15px;
+}
+
+.semestre-field {
+    flex-grow: 1;
+}
+
+.helper-text {
+    font-size: 12px;
+    color: var(--helper-text-color);
+    margin-top: 5px;
+    display: block;
+}
+
+/* Botón de summit*/
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--primary-red);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: var(--secondary-red);
+}
+
+/* Clase para ocultar campos dependiendo qué práctica se elija*/
+.hidden {
+    display: none;
+}
+
+
+.updated {
+    animation: flash 0.5s ease-out;
+}
+
+.error {
+    border-color: #D32F2F !important; 
+    box-shadow: 0 0 5px rgba(211, 47, 47, 0.3) !important; 
+}

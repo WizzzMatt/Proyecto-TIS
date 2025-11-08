@@ -1,0 +1,96 @@
+:root {
+    --bg-color: #f4f4f4; 
+    --text-color: #495057;
+    --title-color: #8B0000; 
+    --white-color: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.08);
+    --border-color: #D3BDBD;
+
+    /* Colores para los botones */
+    --color-ingreso: #20c997; 
+    --color-editar: #ffc107; 
+    --color-listado: #aa85ed; 
+    --icon-color: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px; 
+    box-sizing: border-box;
+}
+
+.main-container {
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+
+    background-color: var(--white-color);
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    border-top: 5px solid var(--title-color); /* Borde superior rojo */
+}
+
+h1 {
+    color: var(--title-color);
+    font-weight: 600;
+    margin-top: 0; 
+    margin-bottom: 40px;
+    font-size: 28px;
+}
+
+
+.menu-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap; 
+}
+
+/* Estilo de cada Botón*/
+.menu-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 180px;
+    height: 160px;
+    padding: 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 15px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.menu-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px var(--shadow-color);
+}
+
+#btn-ingreso { background-color: var(--color-ingreso); }
+#btn-editar { background-color: var(--color-editar); }
+#btn-listado { background-color: var(--color-listado); }
+
+.icon-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 48px;
+    color: var(--icon-color);
+}
+
+.menu-button span {
+    line-height: 1.3;
+}
