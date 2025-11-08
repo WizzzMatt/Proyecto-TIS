@@ -80,7 +80,7 @@ class SimSyncService
         return $total;
     }
 
-    public function syncNotas(): int
+public function syncNotas(): int
     {
         Log::info('[SYNC] Iniciando sincronización de notas...');
         $total = 0;
@@ -88,14 +88,27 @@ class SimSyncService
         try {
             SimNota::query()->orderBy('rut_alumno')->chunk(500, function ($chunk) use (&$total) {
                 foreach ($chunk as $n) {
-                    DB::table('proyectos')
+                    
+                    // Preparamos los datos de la nota
+                    $datosNota = [
+                        'nota_final' => $n->nota_final,
+                        'fecha_nota' => $n->fecha_nota,
+                        'updated_at' => now(),
+                    ];
+
+                    // 1. Actualizamos Proyectos
+                    $actualizado = DB::table('proyectos')
                         ->where('alumno_rut', $n->rut_alumno)
-                        ->update([
-                            'nota_final' => $n->nota_final,
-                            'fecha_nota' => $n->fecha_nota,
-                            'updated_at' => now(),
-                        ]);
+                        ->update($datosNota);
+
+                    // 2. Si no lo encontró (actualizado=0), actualizamos PracticaTutelada
+                    if ($actualizado == 0) {
+                        DB::table('practica_tutelada')
+                            ->where('alumno_rut', $n->rut_alumno)
+                            ->update($datosNota);
+                    }
                 }
+                
                 $total += $chunk->count();
                 Log::info("[SYNC] Se procesaron {$total} notas hasta ahora.");
             });
@@ -107,7 +120,6 @@ class SimSyncService
 
         return $total;
     }
-
 
     public function syncHabilitacionesCampos(): array
     {

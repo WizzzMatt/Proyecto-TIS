@@ -8,41 +8,40 @@ use Illuminate\Support\Facades\Log;
 
 class SyncSimulacion extends Command
 {
-    protected $signature = 'simulacion:sync {--with-notas : Sincroniza también notas}';
-    protected $description = 'Sincroniza datos desde la BD simulada (alumnos, profesores, (opcional) notas)';
+    // Limpiamos la firma, ya que syncNotas ahora se encarga de todo
+    protected $signature = 'simulacion:sync';
+    protected $description = 'Valida y Sincroniza datos desde la BD simulada (alumnos, profesores y notas)';
 
     public function handle(SimSyncService $service)
     {
-        $this->info('Iniciando sincronización desde BD simulada...');
+        $this.info('Iniciando VALIDACIÓN y Sincronización desde BD simulada...');
+        Log::info('[simulacion:sync] Iniciando trabajo programado...');
 
         try {
-            // --- 1. Sincroniza alumnos y profesores ---
+            // --- 1. Sincroniza alumnos ---
             $al = $service->syncAlumnos();
+            $this.info("Alumnos validados y sincronizados: {$al}");
+
+            // --- 2. Sincroniza profesores ---
             $pr = $service->syncProfesores();
-            $this->info("Alumnos sincronizados: {$al}");
-            $this->info("Profesores sincronizados: {$pr}");
+            $this.info("Profesores validados y sincronizados: {$pr}");
 
-            // --- 2. NUEVO: Actualiza habilitaciones existentes ---
-            $hab = $service->syncHabilitacionesCampos();
-            $this->info("Habilitaciones actualizadas → Proyectos: {$hab['proyectos']}, Prácticas: {$hab['practicas']}");
-
-            // --- 3. Notas (si activas la opción) ---
-            if ($this->option('with-notas')) {
-                $no = $service->syncNotas();
-                $this->info("Notas procesadas: {$no}");
-            }
+            // --- 3. Sincroniza notas ---
+            // (Esto solo funcionará cuando R2 esté implementado y existan habilitaciones)
+            $no = $service->syncNotas();
+            $this.info("Notas validadas y sincronizadas: {$no}");
 
             // --- 4. Final ---
-            $this->info('Sincronización OK');
+            $this.info('Sincronización OK');
             Log::info('[simulacion:sync] OK', [
                 'alumnos' => $al,
                 'profesores' => $pr,
-                'habilitaciones' => $hab
+                'notas' => $no
             ]);
 
             return self::SUCCESS;
         } catch (\Throwable $e) {
-            $this->error('Error en sincronización: '.$e->getMessage());
+            $this.error('Error en sincronización: '.$e->getMessage());
             Log::error('[simulacion:sync] ERROR', ['ex' => $e]);
             return self::FAILURE;
         }
