@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator; // ¡IMPORTANTE! Importamos el Validador
 use App\Models\SimAlumno;
 use App\Models\SimProfesor;
 use App\Models\SimNota;
@@ -12,171 +13,216 @@ use App\Models\PracticaTutelada;
 
 class SimSyncService
 {
+    /**
+     * Carga y VALIDA los alumnos (R1.1, R1.2, R1.5)
+     */
     public function syncAlumnos(): int
     {
-        Log::info('[SYNC] Iniciando sincronización de alumnos...');
-        $total = 0;
+        Log::info('[SYNC] Iniciando validación y sincronización de alumnos...');
+        $totalProcesados = 0;
+        $totalValidos = 0;
+        $reglas = $this->getReglasAlumno(); // Traemos las reglas de R1
 
         try {
-            SimAlumno::query()->orderBy('rut')->chunk(500, function ($chunk) use (&$total) {
-                $rows = $chunk->map(function ($a) {
-                    return [
-                        'rut_alumno'    => $a->rut,
-                        'nombre_alumno' => $a->nombre,
+            // Leemos la BD de simulación en trozos (chunks)
+            SimAlumno::query()->orderBy('rut')->chunk(500, function ($chunk) use (&$totalProcesados, &$totalValidos, $reglas) {
+                
+                $filasValidasParaInsertar = [];
+                $totalProcesados += $chunk->count();
+
+                foreach ($chunk as $alumnoSimulado) {
+                    // 1. Convertimos el modelo a un array simple
+                    $datos = $alumnoSimulado->toArray();
+
+                    // 2. VALIDAMOS los datos contra las reglas de R1
+                    $validator = Validator::make($datos, $reglas);
+
+                    if ($validator->fails()) {
+                        // Si la API nos manda basura, lo registramos y lo saltamos
+                        Log::warning("[SYNC] Alumno inválido (RUT: {$datos['rut']}). Saltando.", $validator->errors()->toArray());
+                        continue; // Pasa al siguiente alumno
+                    }
+
+                    // 3. Si es válido, lo preparamos para el 'upsert'
+                    $filasValidasParaInsertar[] = [
+                        'rut_alumno'    => $datos['rut'],
+                        'nombre_alumno' => $datos['nombre'],
                         'created_at'    => now(),
                         'updated_at'    => now(),
                     ];
-                })->toArray();
+                    $totalValidos++;
+                }
 
-                DB::table('alumnos')->upsert(
-                    $rows,
-                    ['rut_alumno'],
-                    ['nombre_alumno', 'updated_at']
-                );
-
-                $total += count($rows);
-                Log::info("[SYNC] Se procesaron {$total} alumnos hasta ahora.");
+                // 4. Insertamos/Actualizamos el chunk de datos válidos
+                if (!empty($filasValidasParaInsertar)) {
+                    DB::table('alumnos')->upsert(
+                        $filasValidasParaInsertar,
+                        ['rut_alumno'], // Si el RUT ya existe...
+                        ['nombre_alumno', 'updated_at'] // ...actualiza estos campos
+                    );
+                }
             });
 
-            Log::info("[SYNC] Sincronización de alumnos completada. Total: {$total}");
+            Log::info("[SYNC] Sincronización de alumnos completada. Total: $totalValidos / $totalProcesados válidos.");
+            return $totalValidos;
+
         } catch (\Throwable $e) {
             Log::error('[SYNC] Error en sincronización de alumnos', ['error' => $e->getMessage()]);
+            return 0;
         }
-
-        return $total;
     }
 
+    /**
+     * Carga y VALIDA los profesores (R1.3, R1.4)
+     */
     public function syncProfesores(): int
     {
-        Log::info('[SYNC] Iniciando sincronización de profesores...');
-        $total = 0;
+        Log::info('[SYNC] Iniciando validación y sincronización de profesores...');
+        $totalProcesados = 0;
+        $totalValidos = 0;
+        $reglas = $this->getReglasProfesor(); // Traemos las reglas de R1
 
         try {
-            SimProfesor::query()->orderBy('rut')->chunk(500, function ($chunk) use (&$total) {
-                $rows = $chunk->map(function ($p) {
-                    return [
-                        'rut_profesor'    => $p->rut,
-                        'nombre_profesor' => $p->nombre,
+            SimProfesor::query()->orderBy('rut')->chunk(500, function ($chunk) use (&$totalProcesados, &$totalValidos, $reglas) {
+                
+                $filasValidasParaInsertar = [];
+                $totalProcesados += $chunk->count();
+
+                foreach ($chunk as $profesorSimulado) {
+                    $datos = $profesorSimulado->toArray();
+                    $validator = Validator::make($datos, $reglas);
+
+                    if ($validator->fails()) {
+                        Log::warning("[SYNC] Profesor inválido (RUT: {$datos['rut']}). Saltando.", $validator->errors()->toArray());
+                        continue;
+                    }
+
+                    $filasValidasParaInsertar[] = [
+                        'rut_profesor'    => $datos['rut'],
+                        'nombre_profesor' => $datos['nombre'],
                         'created_at'      => now(),
                         'updated_at'      => now(),
                     ];
-                })->toArray();
+                    $totalValidos++;
+                }
 
-                DB::table('profesores')->upsert(
-                    $rows,
-                    ['rut_profesor'],
-                    ['nombre_profesor', 'updated_at']
-                );
-
-                $total += count($rows);
-                Log::info("[SYNC] Se procesaron {$total} profesores hasta ahora.");
+                if (!empty($filasValidasParaInsertar)) {
+                    DB::table('profesores')->upsert(
+                        $filasValidasParaInsertar,
+                        ['rut_profesor'],
+                        ['nombre_profesor', 'updated_at']
+                    );
+                }
             });
 
-            Log::info("[SYNC] Sincronización de profesores completada. Total: {$total}");
+            Log::info("[SYNC] Sincronización de profesores completada. Total: $totalValidos / $totalProcesados válidos.");
+            return $totalValidos;
+            
         } catch (\Throwable $e) {
             Log::error('[SYNC] Error en sincronización de profesores', ['error' => $e->getMessage()]);
+            return 0;
         }
-
-        return $total;
     }
 
-public function syncNotas(): int
+    /**
+     * Carga y VALIDA las notas (R1.6, R1.8)
+     */
+    public function syncNotas(): int
     {
-        Log::info('[SYNC] Iniciando sincronización de notas...');
-        $total = 0;
+        Log::info('[SYNC] Iniciando validación y sincronización de notas...');
+        $totalProcesados = 0;
+        $totalValidos = 0;
+        $reglas = $this->getReglasNota(); // Traemos las reglas de R1
 
         try {
-            SimNota::query()->orderBy('rut_alumno')->chunk(500, function ($chunk) use (&$total) {
-                foreach ($chunk as $n) {
-                    
-                    // Preparamos los datos de la nota
+            SimNota::query()->orderBy('rut_alumno')->chunk(500, function ($chunk) use (&$totalProcesados, &$totalValidos, $reglas) {
+                
+                $totalProcesados += $chunk->count();
+
+                foreach ($chunk as $notaSimulada) {
+                    $datos = $notaSimulada->toArray();
+                    $validator = Validator::make($datos, $reglas);
+
+                    if ($validator->fails()) {
+                        Log::warning("[SYNC] Nota inválida (RUT: {$datos['rut_alumno']}). Saltando.", $validator->errors()->toArray());
+                        continue;
+                    }
+
                     $datosNota = [
-                        'nota_final' => $n->nota_final,
-                        'fecha_nota' => $n->fecha_nota,
+                        'nota_final' => $datos['nota_final'],
+                        'fecha_nota' => $datos['fecha_nota'], // Laravel convertirá el formato
                         'updated_at' => now(),
                     ];
 
-                    // 1. Actualizamos Proyectos
-                    $actualizado = DB::table('proyectos')
-                        ->where('alumno_rut', $n->rut_alumno)
-                        ->update($datosNota);
-
-                    // 2. Si no lo encontró (actualizado=0), actualizamos PracticaTutelada
+                    // Actualizamos Proyectos
+                    $actualizado = Proyecto::where('alumno_rut', $datos['rut_alumno'])->update($datosNota);
+                    // Si no, actualizamos Prácticas
                     if ($actualizado == 0) {
-                        DB::table('practica_tutelada')
-                            ->where('alumno_rut', $n->rut_alumno)
-                            ->update($datosNota);
+                        PracticaTutelada::where('alumno_rut', $datos['rut_alumno'])->update($datosNota);
                     }
+                    $totalValidos++;
                 }
-                
-                $total += $chunk->count();
-                Log::info("[SYNC] Se procesaron {$total} notas hasta ahora.");
             });
 
-            Log::info("[SYNC] Sincronización de notas completada. Total: {$total}");
+            Log::info("[SYNC] Sincronización de notas completada. Total: $totalValidos / $totalProcesados válidas.");
+            return $totalValidos;
+
         } catch (\Throwable $e) {
             Log::error('[SYNC] Error en sincronización de notas', ['error' => $e->getMessage()]);
+            return 0;
         }
-
-        return $total;
     }
-
+    
+    /*
+     * Esta función está deprecada. La lógica de 'syncNotas' es más limpia y
+     * la de 'semestre_inscrito' debe manejarse al CREAR la habilitación (en R2),
+     * no en la carga de datos.
+     */
     public function syncHabilitacionesCampos(): array
     {
-        Log::info('[SYNC] Actualizando campos en habilitaciones existentes (semestre/nota)...');
-
-        $updProy = 0;
-        $updPrac = 0;
-
-        // --- PROYECTOS ---
-        Proyecto::query()->orderBy('alumno_rut')->chunk(300, function ($chunk) use (&$updProy) {
-            foreach ($chunk as $p) {
-                // lee origen simulado
-                $simAlu  = SimAlumno::find($p->alumno_rut); // tiene semestre_inscrito
-                $simNota = SimNota::where('rut_alumno', $p->alumno_rut)
-                                ->orderByDesc('fecha_nota')
-                                ->first();
-
-                $sem = $simAlu?->semestre_inscrito; // puede ser null si no existe en sim
-                $nota = $simNota->nota_final ?? null;
-                $fNota = $simNota->fecha_nota ?? null;
-
-                // aplica cambios sólo si hay algo que actualizar
-                $changed = false;
-                if (!is_null($sem) && $p->semestre_inicio !== $sem) { $p->semestre_inicio = $sem; $changed = true; }
-                // si no hay registro en sim_notas => poner NULL explícitamente
-                if ($p->nota_final !== $nota) { $p->nota_final = $nota; $changed = true; }
-                if ($p->fecha_nota != $fNota) { $p->fecha_nota = $fNota; $changed = true; }
-
-                if ($changed) { $p->updated_at = now(); $p->save(); $updProy++; }
-            }
-            Log::info("[SYNC] Proyecto: lote actualizado, acumulados={$updProy}");
-        });
-
-        // --- PRACTICA TUTELADA ---
-        PracticaTutelada::query()->orderBy('alumno_rut')->chunk(300, function ($chunk) use (&$updPrac) {
-            foreach ($chunk as $pt) {
-                $simAlu  = SimAlumno::find($pt->alumno_rut);
-                $simNota = SimNota::where('rut_alumno', $pt->alumno_rut)
-                                ->orderByDesc('fecha_nota')
-                                ->first();
-
-                $sem = $simAlu?->semestre_inscrito;
-                $nota = $simNota->nota_final ?? null;
-                $fNota = $simNota->fecha_nota ?? null;
-
-                $changed = false;
-                if (!is_null($sem) && $pt->semestre_inicio !== $sem) { $pt->semestre_inicio = $sem; $changed = true; }
-                if ($pt->nota_final !== $nota) { $pt->nota_final = $nota; $changed = true; }
-                if ($pt->fecha_nota != $fNota) { $pt->fecha_nota = $fNota; $changed = true; }
-
-                if ($changed) { $pt->updated_at = now(); $pt->save(); $updPrac++; }
-            }
-            Log::info("[SYNC] Práctica: lote actualizado, acumulados={$updPrac}");
-        });
-
-        Log::info('[SYNC] Habilitaciones actualizadas', ['proyectos' => $updProy, 'practicas' => $updPrac]);
-        return ['proyectos' => $updProy, 'practicas' => $updPrac];
+        Log::info('[SYNC] (DEPRECADO) syncHabilitacionesCampos no hizo nada.');
+        return ['proyectos' => 0, 'practicas' => 0];
     }
 
+
+    // --- FUNCIONES HELPER CON LAS REGLAS DE R1 ---
+
+    private function getReglasAlumno(): array
+    {
+        // Validaciones de R1.1, R1.2, R1.5
+        return [
+            'rut' => 'required|integer|digits_between:7,8', // R1.1
+            'nombre' => 'required|string|min:13|max:100', // R1.2 (Simplificado)
+            'semestre_inscrito' => [ // R1.5
+                'required',
+                'string',
+                'size:6',
+                'regex:/^(20(2[5-9]|3[0-9]|4[0-5]))-(1|2)$/' // Formato AAAA-Y y rangos
+            ],
+        ];
+    }
+
+    private function getReglasProfesor(): array
+    {
+        // Validaciones de R1.3, R1.4
+        return [
+            'rut' => 'required|integer|digits_between:7,8', // R1.3
+            'nombre' => 'required|string|min:13|max:100', // R1.4 (Simplificado)
+        ];
+    }
+
+    private function getReglasNota(): array
+    {
+        // Validaciones de R1.1 (para rut), R1.6, R1.8
+        return [
+            'rut_alumno' => 'required|integer|digits_between:7,8', // R1.1
+            'nota_final' => [ // R1.6
+                'required',
+                'numeric',
+                'between:1.0,7.0',
+                'regex:/^\d\.\d$/' // Asegura 1 solo decimal
+            ],
+            'fecha_nota' => 'required|date', // R1.8 (Simplicado, asumimos que la API la manda en formato Y-m-d)
+        ];
+    }
 }
