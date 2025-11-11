@@ -82,7 +82,7 @@
 
                             <div class="mb-3">
                                 <label for="rut-alumno" class="form-label fw-bold">RUT Alumno</label>
-                                <input class="form-control" list="alumnos-list" id="rut-alumno" name="rut-alumno" placeholder="Escriba para buscar..." required>
+                                <input class="form-control" list="alumnos-list" id="rut-alumno" name="rut_alumno" placeholder="Escriba para buscar..." required>
                                 <datalist id="alumnos-list">
                                     @if(isset($alumnos))
                                         @foreach($alumnos as $alumno)
@@ -94,7 +94,7 @@
 
                             <div class="mb-3">
                                 <label for="profesor-guia" class="form-label fw-bold">Profesor Guía/Tutor</label>
-                                <input class="form-control" list="profesores-list" id="profesor-guia" name="profesor-guia" placeholder="Escriba para buscar..." required>
+                                <input class="form-control" list="profesores-list" id="profesor-guia" name="profesor_guia_rut" placeholder="Escriba para buscar..." required>
                                 <datalist id="profesores-list">
                                      @if(isset($profesores))
                                         @foreach($profesores as $profesor)
@@ -106,7 +106,7 @@
 
                             <div class="mb-3">
                                 <label for="tipo-habilitacion" class="form-label fw-bold">Tipo de habilitación</label>
-                                <select class="form-select" id="tipo-habilitacion" name="tipo-habilitacion" required>
+                                <select class="form-select" id="tipo-habilitacion" name="tipo_habilitacion" required>
                                     <option value="" disabled selected>Seleccione una opción</option>
                                     <option value="PrTut">Práctica tutelada (PrTut)</option>
                                     <option value="PrInv">Proyecto de investigación (PrInv)</option>
@@ -119,7 +119,7 @@
 
                                 <div class="mb-3">
                                     <label for="titulo-proyecto" class="form-label fw-bold">Nombre Proyecto</label>
-                                    <input type="text" class="form-control" id="titulo-proyecto" name="titulo-proyecto" maxlength="100">
+                                    <input type="text" class="form-control" id="titulo-proyecto" name="titulo" maxlength="100">
                                 </div>
 
                                 <div class="mb-3">
@@ -129,7 +129,7 @@
 
                                 <div class="mb-3">
                                     <label for="profesor-coguia" class="form-label fw-bold">Profesor Co-guía (opcional)</label>
-                                    <input class="form-control" list="profesores-list" id="profesor-coguia" name="profesor_coguia" placeholder="Escriba para buscar...">
+                                    <input class="form-control" list="profesores-list" id="profesor-coguia" name="profesor_coguia_rut" placeholder="Escriba para buscar...">
                                 </div>
 
                                 <div class="mb-3">
@@ -145,7 +145,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="nombre-supervisor" class="form-label fw-bold">Nombre Supervisor</label>
-                                    <input type="text" class="form-control" id="nombre-supervisor" name="nombre-supervisor" maxlength="100">
+                                    <input type="text" class="form-control" id="nombre-supervisor" name="nombre_supervisor" maxlength="100">
                                 </div>
                             </div>
                             <div class="mb-3">
