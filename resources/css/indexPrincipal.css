@@ -1,7 +1,7 @@
 :root {
-    --color-ingreso: #20c997;
-    --color-editar: #ffc107;
-    --color-listado: #aa85ed;
+    --color-ingreso: #8B0000;
+    --color-editar: #8B0000;
+    --color-listado: #8B0000;
     --color-titulo: #8B0000;
 }
 body {
@@ -46,6 +46,6 @@ body {
 }
 /* Asignar colores de las imágenes */
 #btn-ingreso { background-color: var(--color-ingreso); }
-#btn-editar { background-color: var(--color-editar); color: #333; }
+#btn-editar { background-color: var(--color-editar); }
 #btn-editar:hover { color: #333; }
 #btn-listado { background-color: var(--color-listado); }
