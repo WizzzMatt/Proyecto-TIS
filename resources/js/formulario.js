@@ -109,5 +109,34 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+    const successAlert = document.getElementById('success-alert');
+    const errorAlert = document.getElementById('error-alert');
+    if (successAlert) {
+        setTimeout(() => {
+            // Inicia la transición de desvanecimiento
+            successAlert.style.transition = 'opacity 0.3s ease-out';
+            successAlert.style.opacity = '0';
+            
+            // Espera a que termine la transición (0.3s) y luego la elimina
+            setTimeout(() => {
+                successAlert.remove();
+            }, 300); // 300ms = 0.3s (debe coincidir con la transición)
+            
+        }, 3000); // 3000ms = 3 segundos de espera
+    }
 
+    if (errorAlert) {
+        // Espera 3 segundos (3000 milisegundos)
+        setTimeout(() => {
+            // Inicia la transición de desvanecimiento
+            errorAlert.style.transition = 'opacity 0.3s ease-out';
+            errorAlert.style.opacity = '0';
+            
+            // Espera a que termine la transición (0.3s) y luego la elimina
+            setTimeout(() => {
+                errorAlert.remove();
+            }, 300); // 300ms = 0.3s (debe coincidir con la transición)
+            
+        }, 3000); // 3000ms = 3 segundos de espera
+    }
 });

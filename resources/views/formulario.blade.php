@@ -20,15 +20,16 @@
                         <p class="card-text text-muted mb-4">Complete los siguientes campos para registrar la habilitación.</p>
 
                         @if (session('success'))
-                            <div class="alert alert-success" role="alert">
-                                {{ session('success') }}
-                            </div>
+                        <div class="alert alert-success" role="alert" id="success-alert">
+                            {{ session('success') }}
+                        </div>
                         @endif
                         @if (session('error'))
-                            <div class="alert alert-danger" role="alert">
-                                {{ session('error') }}
+                            <div class="alert alert-danger" role="alert" id="error-alert">
+                            {{ session('error') }}
                             </div>
                         @endif
+                        
                         <form method="POST" action="/registrar-habilitacion">
                             @csrf
 

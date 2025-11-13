@@ -29,6 +29,15 @@ class HabilitacionController extends Controller
 
         if ($tipo == 'PrInv' || $tipo == 'PrIng') {
             
+            //Esto es para que no salga un mensaje de error gigante cuando se trata de agregar una
+            //practica a un alumno que ya la tiene en ese semestre
+            $yaExisteProyecto = Proyecto::where('alumno_rut', $rutAlumno)
+                                        ->where('semestre_inicio', $semestreInicio)
+                                        ->exists(); // exists() es más rápido que first()
+
+            if ($yaExisteProyecto) {
+                return back()->with('error', 'Error: Este alumno ya tiene un proyecto registrado para el semestre ' . $semestreInicio . '.');
+            }
             // --- 3. OBTENER RUTS DE PROFESORES ---
             // Los RUTs vienen limpios desde los campos ocultos
             $profesorGuiaRut = (int)$request->input('profesor_guia_rut');
@@ -37,11 +46,11 @@ class HabilitacionController extends Controller
             $profesorCoguiaRut = null;
             if ($request->input('toggle_coguia') == 'si') {
                  // Convertimos a (int) solo si existe
-                 $profesorCoguiaRut = (int)$request->input('profesor_coguia_rut');
+                $profesorCoguiaRut = (int)$request->input('profesor_coguia_rut');
                  // Si es 0 (porque el campo estaba vacío pero se marcó 'si'), lo volvemos null
-                 if ($profesorCoguiaRut === 0) {
+                if ($profesorCoguiaRut === 0) {
                     $profesorCoguiaRut = null;
-                 }
+                }
             }
 
             // --- 4. GUARDAR EL PROYECTO ---
@@ -71,6 +80,16 @@ class HabilitacionController extends Controller
             // Obtener el RUT del profesor tutor (reutilizando el campo guía)
             $profesorTutorRut = (int)$request->input('profesor_guia_rut');
             
+            //Esto es para que no salga un mensaje de error gigante cuando se trata de agregar una
+            //practica a un alumno que ya la tiene en ese semestre
+            $yaExistePractica = PracticaTutelada::where('alumno_rut', $rutAlumno)
+                                            ->where('semestre_inicio', $semestreInicio)
+                                            ->exists();
+
+            if ($yaExistePractica) {
+                return back()->with('error', 'Error: Este alumno ya tiene una práctica registrada para el semestre ' . $semestreInicio . '.');
+            }
+
             // --- LÓGICA PARA PRÁCTICA TUTELADA ---
             try {
                 PracticaTutelada::create([
