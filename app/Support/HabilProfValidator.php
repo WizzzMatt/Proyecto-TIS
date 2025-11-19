@@ -48,6 +48,19 @@ class HabilProfValidator
         return ['nullable','regex:/^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(2025|2026|2027|2028|2029|2030|2031|2032|2033|2034|2035|2036|2037|2038|2039|2040|2041|2042|2043|2044|2045)$/'];
     }
 
+    public static function reglaTextoSoloLetras(int $max): array
+    {
+        // La u al final del regex es para elUTF-8 (acentos y ñ)
+        $regex = '/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/u'; 
+
+        return [
+            'required', 
+            'string', 
+            "max:{$max}",
+            'regex:' . $regex
+        ];
+    }
+
     // ========== VALIDACIONES COMPUESTAS POR CASO ==========
 
     // Alumno (R1.1, R1.2, R1.5)
@@ -118,6 +131,20 @@ class HabilProfValidator
 
         return self::resultado($v);
     }
+    
+
+    public static function validarPracticaTutelada(array $d): array
+    {
+        $v = Validator::make($d, [
+            'nombre_empresa'       => self::reglaTextoSoloLetras(1,50), 
+            'nombre_supervisor'    => self::reglaTextoSoloLetras(13,100), 
+            'descripcion_practica' => self::reglaTextoSoloLetras(10,1000), 
+            'profesor_tutor_rut'   => self::reglaRut(),
+            'semestre_inicio'      => self::reglaSemestre(),
+        ]);
+
+        return self::resultado($v);
+    }
 
     // ========== HELPERS ==========
 
@@ -155,6 +182,49 @@ class HabilProfValidator
 
         // Retorna como entero (compatible con BIGINT)
         return (int) $id;
+    }
+
+    // ========== NUEVAS REGLAS PARA PROYECTO ==========
+
+    // R.Titulo: Solo letras y espacios. Min 5, Max 100.
+    public static function reglaTitulo(): array
+    {
+        return [
+            'required', 
+            'string', 
+            'min:5', 
+            'max:100', 
+            // Regex: Solo letras (mayus/minus), tildes (áéíóú), ñ y espacios.
+            'regex:/^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s]+$/'
+        ];
+    }
+
+    // R.Descripcion: Solo letras, espacios y puntuación básica (.,). Min 10, Max 500.
+    public static function reglaDescripcion(): array
+    {
+        return [
+            'required', 
+            'string', 
+            'min:10', 
+            'max:500',
+            // Regex: Letras, tildes, espacios y signos de puntuación básicos (.,;)
+            // Si quieres ESTRICTAMENTE solo letras sin puntos, quita ".,;" del regex.
+            'regex:/^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s.,;]+$/'
+        ];
+    }
+
+    // Validar datos específicos del Proyecto
+    public static function validarProyecto(array $d): array
+    {
+        $v = Validator::make($d, [
+            'titulo'      => self::reglaTitulo(),
+            'descripcion' => self::reglaDescripcion(),
+        ], [
+            'titulo.regex' => 'El título solo debe contener letras y espacios.',
+            'descripcion.regex' => 'La descripción solo debe contener letras y signos de puntuación.',
+        ]);
+
+        return self::resultado($v);
     }
 
 }

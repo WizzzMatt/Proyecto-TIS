@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario de Habilitación Profesional</title>
     <link rel="icon" href="{{ asset('logo.ico') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/formulario.js'])
 </head>
 <body>
     <div class="container my-5">
@@ -20,42 +22,43 @@
                         <p class="card-text text-muted mb-4">Complete los siguientes campos para registrar la habilitación.</p>
 
                         @if (session('success'))
-                        <div class="alert alert-success" role="alert" id="success-alert">
-                            {{ session('success') }}
-                        </div>
+                            <div class="alert alert-success" role="alert" id="success-alert">
+                                {{ session('success') }}
+                            </div>
                         @endif
+                        
                         @if (session('error'))
                             <div class="alert alert-danger" role="alert" id="error-alert">
-                            {{ session('error') }}
+                                {{ session('error') }}
                             </div>
                         @endif
                         
                         <form method="POST" action="/registrar-habilitacion">
                             @csrf
 
-<div class="mb-3">
-    <label for="select-alumno" class="form-label fw-bold">Alumno</label>
-    <select id="select-alumno" name="rut_alumno" placeholder="Escriba para buscar..." required>
-        <option value="">Seleccione un alumno...</option>
-        @if(isset($alumnos))
-            @foreach($alumnos as $alumno)
-                <option value="{{ $alumno->rut_alumno }}">{{ $alumno->nombre_alumno }}</option>
-            @endforeach
-        @endif
-    </select>
-</div>
+                            <div class="mb-3">
+                                <label for="select-alumno" class="form-label fw-bold">Alumno</label>
+                                <select id="select-alumno" name="rut_alumno" placeholder="Escriba para buscar..." required>
+                                    <option value="">Seleccione un alumno...</option>
+                                    @if(isset($alumnos))
+                                        @foreach($alumnos as $alumno)
+                                            <option value="{{ $alumno->rut_alumno }}">{{ $alumno->nombre_alumno }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
 
-<div class="mb-3 d-none" id="profesor-container">
-    <label for="select-profesor-guia" class="form-label fw-bold" id="label-profesor">Profesor Guía/Tutor</label>
-    <select id="select-profesor-guia" name="profesor_guia_rut" placeholder="Escriba para buscar..." required>
-        <option value="">Seleccione un profesor...</option>
-        @if(isset($profesores))
-            @foreach($profesores as $profesor)
-                <option value="{{ $profesor->rut_profesor }}">{{ $profesor->nombre_profesor }}</option>
-            @endforeach
-        @endif
-    </select>
-</div>
+                            <div class="mb-3 d-none" id="profesor-container">
+                                <label for="select-profesor-guia" class="form-label fw-bold" id="label-profesor">Profesor Guía/Tutor</label>
+                                <select id="select-profesor-guia" name="profesor_guia_rut" placeholder="Escriba para buscar..." required>
+                                    <option value="">Seleccione un profesor...</option>
+                                    @if(isset($profesores))
+                                        @foreach($profesores as $profesor)
+                                            <option value="{{ $profesor->rut_profesor }}">{{ $profesor->nombre_profesor }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
 
                             <div class="mb-3">
                                 <label for="tipo-habilitacion" class="form-label fw-bold">Tipo de habilitación</label>
@@ -76,16 +79,16 @@
                                 </div>
 
                                 <div class="mb-3">
-    <label for="select-profesor-comision" class="form-label fw-bold">Profesor Comisión</label>
-    <select id="select-profesor-comision" name="profesor_comision_rut" placeholder="Escriba para buscar..." required>
-        <option value="">Seleccione un profesor...</option>
-        @if(isset($profesores))
-            @foreach($profesores as $profesor)
-                <option value="{{ $profesor->rut_profesor }}">{{ $profesor->nombre_profesor }}</option>
-            @endforeach
-        @endif
-    </select>
-</div>
+                                    <label for="select-profesor-comision" class="form-label fw-bold">Profesor Comisión</label>
+                                    <select id="select-profesor-comision" name="profesor_comision_rut" placeholder="Escriba para buscar..." required>
+                                        <option value="">Seleccione un profesor...</option>
+                                        @if(isset($profesores))
+                                            @foreach($profesores as $profesor)
+                                                <option value="{{ $profesor->rut_profesor }}">{{ $profesor->nombre_profesor }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
 
                                 <div class="mb-3">
                                     <label for="toggle-coguia" class="form-label fw-bold">¿Desea incluir un profesor co-guía?</label>
@@ -96,23 +99,23 @@
                                 </div>
 
                                 <div class="mb-3 d-none" id="coguia-container">
-    <label for="select-profesor-coguia" class="form-label fw-bold">Profesor Co-guía</label>
-    <select id="select-profesor-coguia" name="profesor_coguia_rut" placeholder="Escriba para buscar...">
-        <option value="">Seleccione un profesor...</option>
-        @if(isset($profesores))
-            @foreach($profesores as $profesor)
-                <option value="{{ $profesor->rut_profesor }}">{{ $profesor->nombre_profesor }}</option>
-            @endforeach
-        @endif
-    </select>
-</div>
+                                    <label for="select-profesor-coguia" class="form-label fw-bold">Profesor Co-guía</label>
+                                    <select id="select-profesor-coguia" name="profesor_coguia_rut" placeholder="Escriba para buscar...">
+                                        <option value="">Seleccione un profesor...</option>
+                                        @if(isset($profesores))
+                                            @foreach($profesores as $profesor)
+                                                <option value="{{ $profesor->rut_profesor }}">{{ $profesor->nombre_profesor }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
 
                                 <div class="mb-3">
                                     <label for="descripcion" class="form-label fw-bold">Descripción</label>
                                     <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Añada una breve descripción del proyecto..."></textarea>
                                 </div>
-
                             </div>
+
                             <div id="practica-container" class="d-none"> 
                                 <div class="mb-3">
                                     <label for="nombre-empresa" class="form-label fw-bold">Nombre empresa</label>
@@ -124,10 +127,10 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="descripcion-practica" class="form-label fw-bold">Descripción</label>
-                                    <textarea class="form-control" id="descripcion-practica" name="descripcion_practica" rows="3"
-                                        placeholder="Añade una breve descripción" required></textarea>
+                                    <textarea class="form-control" id="descripcion-practica" name="descripcion_practica" rows="3" placeholder="Añade una breve descripción" required></textarea>
                                 </div>
                             </div>
+
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Semestre inicio</label>
                                 <div class="row g-2">
@@ -161,20 +164,7 @@
             </div>
         </div>
     </div>
-<!-- Scripts -->
+
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Inicializar selects con buscador
-            new TomSelect('#rut_alumno', { create: false, sortField: {field: "text"} });
-            new TomSelect('#profesor_guia', { create: false, sortField: {field: "text"} });
-});
-
-    </script>
-</body>
-</html>
-        </div>
-    </div>
-
 </body>
 </html>

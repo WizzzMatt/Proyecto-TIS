@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const descripcionProyecto = document.getElementById('descripcion');
 
 
-    // --- LÓGICA DE MOSTRAR/OCULTAR Y REQUIRED ---
+    // LÓGICA DE MOSTRAR/OCULTAR Y REQUIRED 
     if (tipoHabilitacion) {
         tipoHabilitacion.addEventListener('change', function () {
             const selectedValue = this.value;
@@ -137,8 +137,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 errorAlert.remove();
             }, 300); // 300ms = 0.3s (debe coincidir con la transición)
             
-        }, 3000); // 3000ms = 3 segundos de espera
+        }, 30000); // 3000ms = 3 segundos de espera
     }
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    // Configuración base para TomSelect
+    const tomSelectConfig = {
+        create: false,
+        sortField: { field: "text" }
+    };
+
+    // Inicializar select de Alumno
+    // Nota: Corregí el selector de '#rut_alumno' a '#select-alumno' para coincidir con el HTML
+    if (document.getElementById('select-alumno')) {
+        new TomSelect('#select-alumno', tomSelectConfig);
+    }
+
+    // Inicializar select de Profesor Guía
+    // Nota: Corregí el selector de '#profesor_guia' a '#select-profesor-guia'
+    if (document.getElementById('select-profesor-guia')) {
+        new TomSelect('#select-profesor-guia', tomSelectConfig);
+    }
+
+    // Inicializar select de Profesor Comisión (Agregado para consistencia)
+    if (document.getElementById('select-profesor-comision')) {
+        new TomSelect('#select-profesor-comision', tomSelectConfig);
+    }
+
+    // Inicializar select de Profesor Co-guía (Agregado para consistencia)
+    if (document.getElementById('select-profesor-coguia')) {
+        new TomSelect('#select-profesor-coguia', tomSelectConfig);
+    }
+});
 
