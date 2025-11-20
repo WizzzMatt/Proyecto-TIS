@@ -24,7 +24,7 @@ class HabilitacionController extends Controller
         try {
             if ($tipo == 'PrInv' || $tipo == 'PrIng') {
                 
-                // Validación: Ya existe proyecto
+                // Validacion: si ya existe proyecto
                 $yaExisteProyecto = Proyecto::where('alumno_rut', $rutAlumno)
                                             ->where('semestre_inicio', $semestreInicio)
                                             ->exists();
@@ -66,13 +66,13 @@ class HabilitacionController extends Controller
                     return back()->with('error', 'Error en datos del proyecto: ' . $errores)->withInput();
                 }
                 
-                // Límite de proyectos
+                // Limite de proyectos
                 $proyectosActivosGuia = Proyecto::where('profesor_guia_rut', $profesorGuiaRut)
                                                 ->whereNull('nota_final')
                                                 ->count();
 
                 if ($proyectosActivosGuia >= 5) {
-                    return back()->with('error', 'Error: Límite de asignaciones alcanzado para el profesor guía.');
+                    return back()->with('error', 'Error: Límite de asignaciones alcanzado.');
                 }
 
                 // Crear Proyecto
@@ -93,7 +93,7 @@ class HabilitacionController extends Controller
                 
                 $profesorTutorRut = (int)$request->input('profesor_guia_rut');
                 
-                // Validación: Ya existe práctica
+                // Validacin: si ya existe practica
                 $yaExistePractica = PracticaTutelada::where('alumno_rut', $rutAlumno)
                                                 ->where('semestre_inicio', $semestreInicio)
                                                 ->exists();
@@ -113,10 +113,10 @@ class HabilitacionController extends Controller
                 $validationResult = HabilProfValidator::validarPracticaTutelada($dataToValidate);
 
                 if (!$validationResult['ok']) {
-                    return back()->with('error', 'Error de validación en práctica')->withInput();
+                    return back()->with('error', 'Los datos ingresados no son válidos')->withInput();
                 }
 
-                // Crear Práctica
+                // Crear Practica
                 $nuevaPractica = PracticaTutelada::create([
                     'alumno_rut' => $rutAlumno,
                     'semestre_inicio' => $semestreInicio,
@@ -129,14 +129,14 @@ class HabilitacionController extends Controller
                 ]);
             }
 
-            // Redirección final con los datos creados
+            // Redireccion final con los datos creados
             return redirect('/formulario')
                     ->with('success', 'Habilitación registrada con éxito.')
                     ->with('proyecto_creado', $nuevoProyecto)
                     ->with('practica_creada', $nuevaPractica);
 
         } catch (\Exception $e) {
-            // Captura cualquier error general sin especificar tipo
+            // Cualquier error general sin especificar tipo
             return back()->with('error', 'Ocurrió un error al guardar: ' . $e->getMessage())->withInput();
         }
     }

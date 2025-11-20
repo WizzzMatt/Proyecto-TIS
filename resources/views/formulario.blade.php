@@ -21,7 +21,6 @@
                         <h1 class="h3 mb-2 custom-card-title">Formulario de Habilitación Profesional</h1>
                         <p class="card-text text-muted mb-4">Complete los siguientes campos para registrar la habilitación.</p>
 
-                        {{-- ALERTAS DE ÉXITO O ERROR --}}
                         @if (session('success'))
                             <div class="alert alert-success" role="alert" id="success-alert">
                                 {{ session('success') }}
@@ -34,11 +33,10 @@
                             </div>
                         @endif
 
-                        {{-- BLOQUE: DETALLES DEL PROYECTO REGISTRADO (SI EXISTE) --}}
                         @if (session('proyecto_creado'))
                             <div class="card border-danger mb-4">
                                 <div class="card-header bg-danger text-white">
-                                    <strong>Detalles del Proyecto Registrado</strong>
+                                    <strong>Se ha ingresado exitosamente la Habilitación Profesional del alumno</strong>
                                 </div>
                                 <div class="card-body">
                                     <div class="row mb-2">
@@ -72,11 +70,10 @@
                             </div>
                         @endif
 
-                        {{-- BLOQUE: DETALLES DE PRÁCTICA TUTELADA (SI EXISTE) --}}
                         @if (session('practica_creada'))
                             <div class="card border-danger mb-4">
                                 <div class="card-header bg-danger text-white">
-                                    <strong>Detalles de la Práctica Registrada</strong>
+                                    <strong>Se ha ingresado exitosamente la Habilitación Profesional del alumno</strong>
                                 </div>
                                 <div class="card-body">
                                     <div class="row mb-2">

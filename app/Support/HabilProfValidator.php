@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Validator;
 
 class HabilProfValidator
 {
-    // ========== REGLAS BÁSICAS ==========
     // R1.1 y R1.3: RUT ∈ [1.000.000, 99.999.999], 7–8 dígitos
     public static function reglaRut(): array
     {
@@ -48,6 +47,7 @@ class HabilProfValidator
         return ['nullable','regex:/^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(2025|2026|2027|2028|2029|2030|2031|2032|2033|2034|2035|2036|2037|2038|2039|2040|2041|2042|2043|2044|2045)$/'];
     }
 
+    // Regla para titulo, nombre_supervisor, nombre_empresa, despricion(proyecto o practica)
     public static function reglaTextoSoloLetras(int $max): array
     {
         // La u al final del regex es para elUTF-8 (acentos y ñ)
@@ -60,8 +60,6 @@ class HabilProfValidator
             'regex:' . $regex
         ];
     }
-
-    // ========== VALIDACIONES COMPUESTAS POR CASO ==========
 
     // Alumno (R1.1, R1.2, R1.5)
     public static function validarAlumno(array $d): array
@@ -132,13 +130,13 @@ class HabilProfValidator
         return self::resultado($v);
     }
     
-
+    // Valida todas las restricciones de la practica (Requisitos)
     public static function validarPracticaTutelada(array $d): array
     {
         $v = Validator::make($d, [
             'nombre_empresa'       => self::reglaTextoSoloLetras(50), 
             'nombre_supervisor'    => self::reglaTextoSoloLetras(100), 
-            'descripcion_practica' => self::reglaTextoSoloLetras(1000), 
+            'descripcion_practica' => self::reglaDescripcion(), 
             'profesor_tutor_rut'   => self::reglaRut(),
             'semestre_inicio'      => self::reglaSemestre(),
         ]);
@@ -184,16 +182,16 @@ class HabilProfValidator
         return (int) $id;
     }
 
-    // ========== NUEVAS REGLAS PARA PROYECTO ==========
+   // Reglas para proyectos
 
-    // R.Titulo: Solo letras y espacios. Min 5, Max 100.
+    // R.Titulo: Solo letras y espacios. Min 10, Max 80.
     public static function reglaTitulo(): array
     {
         return [
             'required', 
             'string', 
-            'min:5', 
-            'max:100', 
+            'min:10', 
+            'max:80', 
             // Regex: Solo letras (mayus/minus), tildes (áéíóú), ñ y espacios.
             'regex:/^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s]+$/'
         ];
@@ -206,7 +204,7 @@ class HabilProfValidator
             'required', 
             'string', 
             'min:10', 
-            'max:500',
+            'max:1000',
             // Regex: Letras, tildes, espacios y signos de puntuación básicos (.,;)
             // Si quieres ESTRICTAMENTE solo letras sin puntos, quita ".,;" del regex.
             'regex:/^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s.,;]+$/'
