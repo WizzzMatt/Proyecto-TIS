@@ -169,18 +169,6 @@ class HabilProfValidator
         return ['ok'=>true, 'errors'=>[]];
     }
 
-    // R1.12: Generar ID_Habilitacion = RUT_Alumno + AAAAY (como número entero)
-    public static function generarIdHabilitacion(int $rutAlumno, string $semestreInicio): int
-    {
-        // semestre: "AAAA-Y" -> AAAA + Y
-        [$aaaa, $y] = explode('-', $semestreInicio);
-
-        // Concatenamos rut + año + semestre
-        $id = $rutAlumno . $aaaa . $y;
-
-        // Retorna como entero (compatible con BIGINT)
-        return (int) $id;
-    }
 
    // Reglas para proyectos
 
