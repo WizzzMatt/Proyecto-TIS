@@ -22,7 +22,7 @@
 }
 
 .form-control:disabled, .form-control[readonly] {
-     background-color: #f8f9fa; /* Color gris claro */
+     background-color: #f8f9fa; 
 }
 
 /* Botones Rojos */
@@ -55,31 +55,25 @@
 .back-link:hover { color: #333; }
 
 
-/* =========================================
-   2. ESTILOS ESPECÍFICOS PARA ESTA VISTA (Tablas y Modales)
-   ========================================= */
-
-/* Encabezados Rojos (Tabla y Modal) */
 .bg-custom-red, 
 .table-dark th {
     background-color: var(--color-titulo) !important;
     border-color: #680000;
 }
 
-/* Texto rojo (para el ID) */
+/* ID */
 .text-danger {
     color: var(--color-titulo) !important;
 }
 
 /* Etiquetas de Tipo */
 .badge.bg-primary {
-    background-color: var(--color-titulo) !important; /* PrInv */
+    background-color: var(--color-titulo) !important; /* PrInv y PrIng*/
 }
 .badge.bg-success {
-    background-color: #556B2F !important; /* PrTut (Verde Oliva) */
+    background-color: #556B2F !important; /* PrTut */
 }
 
-/* Validaciones (Borde rojo e icono de error) */
 .is-invalid {
     border-color: #dc3545 !important;
     padding-right: calc(1.5em + 0.75rem);
