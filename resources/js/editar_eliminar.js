@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Rellenar opciones
             profesores.forEach(prof => {
                 const opt = document.createElement('option');
-                opt.value = String(prof.rut); // Convertir RUT a string
+                opt.value = String(prof.rut_profesor); // Convertir RUT a string
                 opt.text = prof.nombre_profesor || prof.nombre; 
                 select.appendChild(opt);
             });

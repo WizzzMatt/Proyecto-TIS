@@ -33,7 +33,7 @@ Route::get('/editar_eliminar', [HabilitacionController::class, 'editarEliminar']
 
 Route::delete('/eliminar-habilitacion/{tipo}/{id}', [HabilitacionController::class, 'eliminar'])->name('habilitacion.eliminar');
 
-Route::put('/actualizar-habilitacion/{tipo}/{id}', [HabilitacionController::class, 'update'])->name('habilitacion.actualizar');
+Route::put('/actualizar-habilitacion/{tipo}/{id}', [HabilitacionController::class, 'update'])->name('habilitacion.update');
 
 // --- RUTAS DE LISTADOS (R4) ---
 

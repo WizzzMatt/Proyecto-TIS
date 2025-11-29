@@ -211,8 +211,8 @@
     <script>
         // Esta línea pasa la lista de profesores de PHP a JavaScript
         // Usamos las banderas JSON para evitar errores con tildes o caracteres raros.
-        window.datosProfesores = {!! json_encode($profesores ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_INVALID_UTF8_IGNORE) !!};
-        
+        //window.datosProfesores = {!! json_encode($profesores ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_INVALID_UTF8_IGNORE) !!};
+        window.datosProfesores = {!! json_encode($profesores ?? []) !!};
         console.log("Profesores cargados en la vista:", window.datosProfesores);
     </script>
 

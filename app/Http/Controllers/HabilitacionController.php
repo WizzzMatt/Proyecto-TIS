@@ -222,17 +222,17 @@ class HabilitacionController extends Controller
     // Funciones para R3: Editar y Eliminar Habilitaciones
     public function editarEliminar()
     {
-    // 1. Cargar proyectos
-    $proyectos = Proyecto::with(['alumno', 'profesorGuia', 'profesorComision', 'profesorCoguia'])->get();
-    
-    // 2. Cargar prácticas
-    $practicas = PracticaTutelada::with(['alumno', 'profesorTutor'])->get();
+        // 1. Cargar proyectos
+        $proyectos = Proyecto::with(['alumno', 'profesorGuia', 'profesorComision', 'profesorCoguia'])->get();
+        
+        // 2. Cargar prácticas
+        $practicas = PracticaTutelada::with(['alumno', 'profesorTutor'])->get();
 
-    // 3. Cargar Profesores (ESTA ES LA LÍNEA QUE TE FALTA O ESTÁ FALLANDO)
-    $profesores = Profesor::orderBy('nombre_profesor')->get(); 
+        // 3. Cargar Profesores (ESTA ES LA LÍNEA QUE TE FALTA O ESTÁ FALLANDO)
+        $profesores = Profesor::orderBy('nombre_profesor')->get(); 
 
-    // 4. Pasarlos a la vista (ASEGÚRATE QUE 'profesores' ESTÉ AQUÍ)
-    return view('editar_eliminar', compact('proyectos', 'practicas', 'profesores'));
+        // 4. Pasarlos a la vista (ASEGÚRATE QUE 'profesores' ESTÉ AQUÍ)
+        return view('editar_eliminar', compact('proyectos', 'practicas', 'profesores'));
     }
 
     public function eliminar($tipo, $id)
