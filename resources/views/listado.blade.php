@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generar Listados - HabilProf</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="{{ asset('logo.ico') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         :root { --color-titulo: #8B0000; --color-btn: #aa85ed; }
         body { background-color: #f4f4f4; display: flex; align-items: center; min-height: 100vh; }

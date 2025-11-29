@@ -4,10 +4,20 @@
     <meta charset="UTF-8">
     <title>Reporte {{ $tipo }} - HabilProf</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="{{ asset('logo.ico') }}">
+    @vite(['resources/css/filtro_tablas.css', 'resources/js/filtro_tablas.js'])
     <style>
         h1, h4 { color: #8B0000; }
         .table-header { background-color: #8B0000; color: white; }
+        /* Alinear las celdas con los títulos */
+        /* .card-historico .table td,
+        .card-historico .table th {
+            text-align: center !important;
+        } */
+
     </style>
+    
 </head>
 <body class="bg-light p-5">
     <div class="container bg-white p-5 shadow rounded border-top border-5 border-danger">
@@ -22,12 +32,23 @@
 
         @if ($tipo === 'Semestral')
             <h4 class="mt-4">Proyectos (Ingeniería / Investigación)</h4>
-            <table class="table table-bordered table-hover mt-2">
+            <!-- Filtro -->
+            <div class="mb-2">
+                <input
+                    type="text"
+                    id="filtro-proyectos"
+                    class="form-control"
+                    placeholder="Buscar en proyectos (RUT, alumno o profesor)…"
+                    data-table-filter="#tabla-proyectos"
+                >
+            </div>
+            <!--  -->
+            <table id="tabla-proyectos" class="table table-bordered table-hover mt-2">
                 <thead class="table-header">
                     <tr>
-                        <th>Semestre</th><th>RUT Alumno</th><th>Nombre</th><th>Tipo</th>
-                        <th>Guía</th><th>Comisión</th><th>Co-Guía</th>
-                        <th>Nota</th><th>Fecha Nota</th>
+                        <th>📚 Semestre</th><th>🪪 RUT Alumno</th><th>🧑‍🎓 Nombre</th><th>💡 Tipo</th>
+                        <th>🧭 Guía</th><th>📝 Comisión</th><th>🤝 Co-Guía</th>
+                        <th>📊 Nota</th><th>📅 Fecha Nota</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,12 +70,23 @@
             </table>
 
             <h4 class="mt-4">Prácticas Tuteladas</h4>
-            <table class="table table-bordered table-hover mt-2">
+            <!-- Filtro -->
+            <div class="mb-2">
+                <input
+                    type="text"
+                    id="filtro-practicas"
+                    class="form-control"
+                    placeholder="Buscar en proyectos (RUT, alumno o profesor)…"
+                    data-table-filter="#tabla-practicas"
+                >
+            </div>
+            <!--  -->
+            <table id="tabla-practicas" class="table table-bordered table-hover mt-2">
                 <thead class="table-header">
                     <tr>
-                        <th>Semestre</th><th>RUT Alumno</th><th>Nombre</th>
-                        <th>Empresa</th><th>Supervisor</th><th>Tutor DINF</th>
-                        <th>Nota</th>
+                        <th>📚 Semestre</th><th>🪪 RUT Alumno</th><th>🧑‍🎓 Nombre</th>
+                        <th>🏢 Empresa</th><th>🧑‍💼Supervisor</th><th>🧑‍🏫 Tutor DINF</th>
+                        <th>📊 Nota</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,23 +108,66 @@
         @endif
 
         @if ($tipo === 'Histórico')
+            <!-- Filtro -->
+            <div class="row g-2 mb-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="filtro-historico-campo" class="form-label fw-bold">Buscar por</label>
+                    <select id="filtro-historico-campo" class="form-select">
+                        <option value="todos">Profesor o Alumno</option>
+                        <option value="profesor">Profesor</option>
+                        <option value="alumno">Alumno</option>
+                    </select>
+                </div>
+
+                <div class="col-md-5">
+                    <label for="filtro-historico" class="form-label fw-bold">Texto</label>
+                    <input
+                        type="text"
+                        id="filtro-historico"
+                        class="form-control"
+                        placeholder="Escriba nombre o parte del nombre…"
+                    >
+                </div>
+
+                <div class="col-md-2">
+                    <label for="filtro-historico-semestre" class="form-label fw-bold">Semestre</label>
+                    <input
+                        type="text"
+                        id="filtro-historico-semestre"
+                        class="form-control"
+                        placeholder="2025-2"
+                    >
+                </div>
+
+                <div class="col-md-2">
+                    <label for="filtro-historico-rol" class="form-label fw-bold">Rol</label>
+                    <select id="filtro-historico-rol" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="guía">Guía</option>
+                        <option value="co-guía">Co-Guía</option>
+                        <option value="comisión">Comisión</option>
+                        <option value="tutor">Tutor</option>
+                    </select>
+                </div>
+            </div>
+            <!--  -->
             <div class="alert alert-info">Ordenado por Profesor y Semestre (R4.9)</div>
             
             @foreach($resultados as $profe)
                 @if($profe->proyectosComoGuia->isNotEmpty() || $profe->proyectosComoComision->isNotEmpty() || $profe->practicasComoTutor->isNotEmpty())
                     
-                    <div class="card mb-4">
+                    <div class="card mb-4 card-historico">
                         <div class="card-header fw-bold">
-                            {{ $profe->nombre_profesor }} ({{ $profe->rut_profesor }})
+                           👨‍🏫 {{ $profe->nombre_profesor }} ({{ $profe->rut_profesor }})
                         </div>
                         <div class="card-body">
-                            <table class="table table-sm">
+                            <table class="table table-sm tabla-historico">
                                 <thead>
                                     <tr>
-                                        <th>Semestre</th>
-                                        <th>Rol</th>
-                                        <th>Alumno</th>
-                                        <th>Tipo</th>
+                                        <th>📚 Semestre</th>
+                                        <th>🤝 Rol</th>
+                                        <th>🧑‍🎓 Alumno</th>
+                                        <th>💡 Tipo</th>
                                     </tr>
                                 </thead>
                                 <tbody>
