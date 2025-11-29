@@ -8,7 +8,7 @@
     <link rel="icon" href="{{ asset('logo.ico') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
-        :root { --color-titulo: #8B0000; --color-btn: #aa85ed; }
+        :root { --color-titulo: #8B0000; --color-btn: #6f39d4ff; }
         body { background-color: #f4f4f4; display: flex; align-items: center; min-height: 100vh; }
         .card { border-top: 5px solid var(--color-titulo); }
         .btn-purple { background-color: var(--color-btn); color: white; font-weight: bold; }
