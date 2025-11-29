@@ -26,10 +26,14 @@ Route::get('/formulario', function () {
         'alumnos' => $alumnos
     ]);
 });
-
+// RUTAS F3
 Route::post('/registrar-habilitacion', [HabilitacionController::class, 'store']);
 
-Route::view('/editar_eliminar', 'editar_eliminar');
+Route::get('/editar_eliminar', [HabilitacionController::class, 'editarEliminar'])->name('habilitacion.editar_eliminar');
+
+Route::delete('/eliminar-habilitacion/{tipo}/{id}', [HabilitacionController::class, 'eliminar'])->name('habilitacion.eliminar');
+
+Route::put('/actualizar-habilitacion/{tipo}/{id}', [HabilitacionController::class, 'update'])->name('habilitacion.actualizar');
 
 // --- RUTAS DE LISTADOS (R4) ---
 

@@ -1,240 +1,274 @@
 document.addEventListener('DOMContentLoaded', function () {
+    console.log("Sistema Iniciado - Depuración Activa");
+
+    // 1. Obtener profesores (protegido contra fallos)
+    const profesores = window.datosProfesores || [];
     
-    // aqui puse datos para simular la interaccion real. (es solo el muckup)
-    let habilitaciones = [
-        { 
-            id: "2025-1 12345678", 
-            rut_alumno: 12345678, 
-            nombre_alumno: "juan  perez", 
-            tipo: "PrInv", // Proyecto de Investigación
-            titulo: "AAAAAAAA", 
-            descripcion: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
-            prof_guia: 11111111, 
-            prof_comision: 22222222, 
-            prof_coguia: null 
-        },
-
-        { 
-            id: "2025-1 99887766", 
-            rut_alumno: 99887766, 
-            nombre_alumno: "Pedro Pascal", 
-            tipo: "PrIng", // Proyecto de ingenieria
-            titulo: "jkdsahfkdfjdksaf", 
-            descripcion: "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido usó una galería de textos y los mezcló de tal manera que logró hacer un libro de textos especimen. No sólo sobrevivió 500 años, sino que tambien ingresó como texto de relleno en documentos electrónicos, quedando esencialmente igual al original. Fue popularizado en los 60s con la creación de las hojas 'Letraset', las cuales contenian pasajes de Lorem Ipsum, y más recientemente con software de autoedición, como por ejemplo Aldus PageMaker, el cual incluye versiones de Lorem Ipsum.", 
-            prof_guia: 33333333, 
-            prof_comision: 11111111, 
-            prof_coguia: null 
-        },
-        { 
-            id: "2025-1 87654321", 
-            rut_alumno: 87654321, 
-            nombre_alumno: "Maria Lopez", 
-            tipo: "PrTut", // Práctica Tutelada
-            empresa: "junaeb", 
-            supervisor: "Carlos Diaz", 
-            descripcion: "gracias maduro", 
-            prof_tutor: 33333333 
-        }
-    ];
-    // profesores para el muckup
-    const profesores = [
-        { rut: 11111111, nombre: "Dr. Alan Turing" },
-        { rut: 22222222, nombre: "Matias Toro" },
-        { rut: 33333333, nombre: "George" }
-    ];
-
-    // --- REFERENCIAS DOM ---
-    const vistaListado = document.getElementById('vista-listado');
+    // Referencias DOM
+    const vistaSeleccion = document.getElementById('vista-seleccion');
+    const vistaBuscador = document.getElementById('vista-buscador');
     const vistaFormulario = document.getElementById('vista-formulario');
     const vistaFinal = document.getElementById('vista-final');
-    const tbody = document.getElementById('tbody-habilitaciones');
-    
-    // Modales
-    const modalEliminar = new bootstrap.Modal(document.getElementById('modalEliminar'));
-    const modalGuardar = new bootstrap.Modal(document.getElementById('modalGuardarCambios'));
-    const modalOtra = new bootstrap.Modal(document.getElementById('modalOtraOperacion'));
 
-    // Variables de estado
-    let idSeleccionado = null;
-    let tipoSeleccionado = null;
+    const contenedorProyectos = document.getElementById('contenedor-select-proyectos');
+    const contenedorPracticas = document.getElementById('contenedor-select-practicas');
+    const selectProyectos = document.getElementById('select-proyectos');
+    const selectPracticas = document.getElementById('select-practicas');
 
-    // RENDERIZAR LISTADO 
-    function renderizarTabla() {
-        tbody.innerHTML = '';
-        habilitaciones.forEach(hab => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${hab.id}</td>
-                <td>${hab.nombre_alumno}</td>
-                <td><span class="badge ${hab.tipo === 'PrTut' ? 'bg-success' : 'bg-primary'}">${hab.tipo}</span></td>
-                <td class="text-end">
-                    <button class="btn btn-sm btn-outline-primary me-2 btn-actualizar" data-id="${hab.id}">
-                        <i class="fa-solid fa-pen"></i> Actualizar
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger btn-eliminar" data-id="${hab.id}">
-                        <i class="fa-solid fa-trash"></i> Eliminar
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-        asignarEventosBotones();
-    }
+    const tarjetaDetalle = document.getElementById('detalle-seleccion');
+    const detalleNombre = document.getElementById('detalle-nombre');
+    const detalleId = document.getElementById('detalle-id');
+    const detalleTipo = document.getElementById('detalle-tipo');
 
-    function asignarEventosBotones() {
-        // Evento Actualizar
-        document.querySelectorAll('.btn-actualizar').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = e.target.closest('button').dataset.id;
-                iniciarActualizacion(id);
-            });
-        });
+    let seleccionActual = null;
 
-        // Evento Eliminar
-        document.querySelectorAll('.btn-eliminar').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                idSeleccionado = e.target.closest('button').dataset.id;
-                modalEliminar.show();
-            });
+    // --- NAVEGACIÓN ---
+    const btnProyecto = document.getElementById('btn-opcion-proyecto');
+    if (btnProyecto) btnProyecto.addEventListener('click', () => mostrarBuscador('proyecto'));
+
+    const btnPractica = document.getElementById('btn-opcion-practica');
+    if (btnPractica) btnPractica.addEventListener('click', () => mostrarBuscador('practica'));
+
+    const btnVolver = document.getElementById('btn-volver-seleccion');
+    if (btnVolver) {
+        btnVolver.addEventListener('click', () => {
+            vistaBuscador.classList.add('d-none');
+            vistaSeleccion.classList.remove('d-none');
+            if(selectProyectos) selectProyectos.selectedIndex = 0;
+            if(selectPracticas) selectPracticas.selectedIndex = 0;
+            tarjetaDetalle.classList.add('d-none');
+            seleccionActual = null;
         });
     }
 
-    // logica de la eliminacion
-    document.getElementById('btn-confirmar-eliminar').addEventListener('click', function() {
-        habilitaciones = habilitaciones.filter(h => h.id !== idSeleccionado);
-        modalEliminar.hide();
-        mostrarMensajeExito("Habilitación Profesional eliminada con éxito");
+    function mostrarBuscador(tipo) {
+        vistaSeleccion.classList.add('d-none');
+        vistaBuscador.classList.remove('d-none');
+        tarjetaDetalle.classList.add('d-none'); 
+
+        if (tipo === 'proyecto') {
+            contenedorProyectos.classList.remove('d-none');
+            contenedorPracticas.classList.add('d-none');
+            document.getElementById('titulo-buscador').innerText = "Buscar en Proyectos";
+        } else {
+            contenedorProyectos.classList.add('d-none');
+            contenedorPracticas.classList.remove('d-none');
+            document.getElementById('titulo-buscador').innerText = "Buscar en Prácticas";
+        }
+    }
+
+    // --- SELECCIÓN Y CARGA DE DATOS ---
+    const selects = document.querySelectorAll('.selector-habilitacion');
+
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            const opcion = this.options[this.selectedIndex];
+            const valorId = this.value;
+
+            if (!valorId) {
+                tarjetaDetalle.classList.add('d-none');
+                seleccionActual = null;
+                return;
+            }
+
+            // LEER DATOS DEL HTML (DATASET)
+            seleccionActual = {
+                id: valorId,
+                tipoHab: opcion.dataset.tipoHab,
+                subtipo: opcion.dataset.subtipo,
+                nombre: opcion.dataset.nombre,
+                descripcion: opcion.dataset.descripcion,
+                
+                // Datos específicos
+                titulo: opcion.dataset.titulo || '',
+                empresa: opcion.dataset.empresa || '',
+                supervisor: opcion.dataset.supervisor || '',
+                
+                // RUTs de Profesores (Limpiamos espacios y convertimos a String)
+                guia: opcion.dataset.guia ? String(opcion.dataset.guia).trim() : '',
+                comision: opcion.dataset.comision ? String(opcion.dataset.comision).trim() : '',
+                coguia: opcion.dataset.coguia ? String(opcion.dataset.coguia).trim() : '',
+                tutor: opcion.dataset.tutor ? String(opcion.dataset.tutor).trim() : ''
+            };
+
+            console.log("Seleccionado:", seleccionActual); // Debug para ver si lee los datos
+
+            // Mostrar tarjeta
+            detalleNombre.innerText = seleccionActual.nombre;
+            detalleId.innerText = seleccionActual.id;
+            detalleTipo.innerText = seleccionActual.subtipo;
+            detalleTipo.className = 'badge fs-6 ' + (seleccionActual.tipoHab === 'practica' ? 'bg-success' : 'bg-primary');
+            tarjetaDetalle.classList.remove('d-none');
+        });
     });
 
-    // logica de la actualizacion
-    function iniciarActualizacion(id) {
-        idSeleccionado = id;
-        const data = habilitaciones.find(h => h.id === id);
-        tipoSeleccionado = data.tipo;
+    // --- INICIAR EDICIÓN (AQUÍ SE RELLENAN LOS DATOS) ---
+    const btnActualizar = document.getElementById('btn-accion-actualizar');
+    if (btnActualizar) {
+        btnActualizar.addEventListener('click', () => {
+            if (seleccionActual) iniciarActualizacion();
+        });
+    }
 
-        // Ocultar listado, mostrar formulario
-        vistaListado.classList.add('d-none');
+    function iniciarActualizacion() {
+        vistaBuscador.classList.add('d-none');
         vistaFormulario.classList.remove('d-none');
 
-        // Cargar datos comunes
-        document.getElementById('input-id').value = data.id;
-        document.getElementById('badge-id-hab').innerText = `ID: ${data.id}`;
-        document.getElementById('input-descripcion').value = data.descripcion;
-
-        // Llenar selects de profesores
+        // 1. LLENAR SELECTS DE PROFESORES PRIMERO
         llenarSelectsProfesores();
 
-        // Lógica para mostrar campos:
-        // Si es PrTut -> Campos de Práctica.
-        // Si NO es PrTut (es decir, PrInv o PrIng) -> Campos de Proyecto.
-        if (data.tipo === 'PrTut') {
-            // Es Práctica
+        // 2. LLENAR CAMPOS COMUNES
+        document.getElementById('input-id').value = seleccionActual.id;
+        document.getElementById('badge-id-hab').innerText = `ID: ${seleccionActual.id}`;
+        document.getElementById('input-descripcion').value = seleccionActual.descripcion;
+
+        // 3. LLENAR CAMPOS ESPECÍFICOS Y SELECCIONAR PROFESORES
+        if (seleccionActual.tipoHab === 'practica') {
             document.getElementById('campos-proyecto').classList.add('d-none');
             document.getElementById('campos-practica').classList.remove('d-none');
             
-            document.getElementById('input-empresa').value = data.empresa;
-            document.getElementById('input-supervisor').value = data.supervisor;
-            document.getElementById('select-prof-tutor').value = data.prof_tutor;
+            document.getElementById('input-empresa').value = seleccionActual.empresa;
+            document.getElementById('input-supervisor').value = seleccionActual.supervisor;
+            
+            // Seleccionar Tutor
+            if(seleccionActual.tutor) {
+                const sel = document.getElementById('select-prof-tutor');
+                sel.value = seleccionActual.tutor;
+                // Si el valor no cambia, es porque el profe no está en la lista (inactivo?)
+                if(sel.value !== seleccionActual.tutor) console.warn("Tutor no encontrado en la lista de profesores");
+            }
+
         } else {
-            // Es Proyecto (PrInv O PrIng)
             document.getElementById('campos-practica').classList.add('d-none');
             document.getElementById('campos-proyecto').classList.remove('d-none');
 
-            document.getElementById('input-titulo').value = data.titulo;
-            document.getElementById('select-prof-guia').value = data.prof_guia;
-            document.getElementById('select-prof-comision').value = data.prof_comision;
-            document.getElementById('select-prof-coguia').value = data.prof_coguia || "";
+            document.getElementById('input-titulo').value = seleccionActual.titulo;
+            
+            // Seleccionar Profesores de Proyecto
+            if(seleccionActual.guia) document.getElementById('select-prof-guia').value = seleccionActual.guia;
+            if(seleccionActual.comision) document.getElementById('select-prof-comision').value = seleccionActual.comision;
+            if(seleccionActual.coguia && seleccionActual.coguia !== 'null') {
+                document.getElementById('select-prof-coguia').value = seleccionActual.coguia;
+            } else {
+                document.getElementById('select-prof-coguia').value = "";
+            }
         }
     }
 
     function llenarSelectsProfesores() {
-        const selects = ['select-prof-guia', 'select-prof-comision', 'select-prof-coguia', 'select-prof-tutor'];
-        selects.forEach(idSelect => {
-            const select = document.getElementById(idSelect);
-            const primeraOpcion = select.options[0] ? select.options[0].outerHTML : '';
-            select.innerHTML = primeraOpcion; 
+        const selectsIds = ['select-prof-guia', 'select-prof-comision', 'select-prof-coguia', 'select-prof-tutor'];
+        
+        selectsIds.forEach(id => {
+            const select = document.getElementById(id);
+            if (!select) return;
 
+            // Guardar opción por defecto
+            const defaultOpt = select.querySelector('option[value=""]');
+            select.innerHTML = ''; 
+            if (defaultOpt) select.appendChild(defaultOpt);
+
+            // Rellenar opciones
             profesores.forEach(prof => {
                 const opt = document.createElement('option');
-                opt.value = prof.rut;
-                opt.text = prof.nombre;
-                select.add(opt);
+                opt.value = String(prof.rut); // Convertir RUT a string
+                opt.text = prof.nombre_profesor || prof.nombre; 
+                select.appendChild(opt);
             });
         });
     }
 
-    // validaciones para el mockup
-    function validarCampo(input, regex, minLength, maxLength) {
-        const valor = input.value;
-        const cumpleLargo = valor.length >= minLength && valor.length <= maxLength;
-        const cumpleRegex = regex.test(valor);
+    // --- RESTO DE LOGICA DE BOTONES
+    const btnCancelar = document.getElementById('btn-cancelar-edicion');
+    if (btnCancelar) btnCancelar.addEventListener('click', () => {
+        vistaFormulario.classList.add('d-none');
+        vistaBuscador.classList.remove('d-none');
+    });
 
-        if (!cumpleLargo || !cumpleRegex) {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-            return false;
-        } else {
-            input.classList.remove('is-invalid');
-            input.classList.add('is-valid');
-            return true;
-        }
+    const btnTerminar = document.getElementById('btn-terminar-actualizacion');
+    if (btnTerminar) btnTerminar.addEventListener('click', () => {
+        new bootstrap.Modal(document.getElementById('modalGuardarCambios')).show();
+    });
+
+    // Guardado REAL 
+    const btnConfGuardar = document.getElementById('btn-confirmar-guardado');
+    if (btnConfGuardar) {
+        btnConfGuardar.addEventListener('click', () => {
+            bootstrap.Modal.getInstance(document.getElementById('modalGuardarCambios')).hide();
+
+            let datosEnviar = {};
+            const tipo = seleccionActual.tipoHab;
+
+            if (tipo === 'proyecto') {
+                const valCoguia = document.getElementById('select-prof-coguia').value;
+                datosEnviar = {
+                    titulo: document.getElementById('input-titulo').value,
+                    descripcion: document.getElementById('input-descripcion').value,
+                    profesor_guia_rut: document.getElementById('select-prof-guia').value,
+                    profesor_comision_rut: document.getElementById('select-prof-comision').value,
+                    profesor_coguia_rut: valCoguia || null,
+                    toggle_coguia: valCoguia ? 'si' : 'no'
+                };
+            } else {
+                datosEnviar = {
+                    nombre_empresa: document.getElementById('input-empresa').value,
+                    nombre_supervisor: document.getElementById('input-supervisor').value,
+                    descripcion: document.getElementById('input-descripcion').value,
+                    descripcion_practica: document.getElementById('input-descripcion').value,
+                    profesor_tutor_rut: document.getElementById('select-prof-tutor').value
+                };
+            }
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            fetch(`/actualizar-habilitacion/${tipo}/${seleccionActual.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                body: JSON.stringify(datosEnviar)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    mostrarMensajeExito("Habilitación actualizada correctamente.");
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(err => console.error(err));
+        });
     }
 
-    // Botón "Terminar Actualización"
-    document.getElementById('btn-terminar-actualizacion').addEventListener('click', function() {
-        let esValido = true;
-
-        const regexDesc = /^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚüÜ\s.,;]+$/; 
-        if (!validarCampo(document.getElementById('input-descripcion'), regexDesc, 100, 1000)) esValido = false;
-
-        if (tipoSeleccionado === 'PrTut') {
-            const regexEmpresa = /^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s]+$/;
-            if (!validarCampo(document.getElementById('input-empresa'), regexEmpresa, 1, 50)) esValido = false;
-
-            const regexSupervisor = /^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s-]+$/; 
-            if (!validarCampo(document.getElementById('input-supervisor'), regexSupervisor, 13, 100)) esValido = false;
-
-        } else {
-            // (Aplica para PrInv y PrIng)
-            const regexTitulo = /^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s]+$/;
-            if (!validarCampo(document.getElementById('input-titulo'), regexTitulo, 10, 80)) esValido = false;
-        }
-
-        if (esValido) {
-            modalGuardar.show();
-        } 
+    // Eliminación (DELETE)
+    const btnEliminar = document.getElementById('btn-accion-eliminar');
+    if (btnEliminar) btnEliminar.addEventListener('click', () => {
+        if(seleccionActual) new bootstrap.Modal(document.getElementById('modalEliminar')).show();
     });
 
-    // guardar y salir
-    document.getElementById('btn-confirmar-guardado').addEventListener('click', function() {
-        modalGuardar.hide();
-        mostrarMensajeExito("Campos actualizados con éxito");
+    const btnConfEliminar = document.getElementById('btn-confirmar-eliminar');
+    if (btnConfEliminar) btnConfEliminar.addEventListener('click', () => {
+        bootstrap.Modal.getInstance(document.getElementById('modalEliminar')).hide();
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        
+        fetch(`/eliminar-habilitacion/${seleccionActual.tipoHab}/${seleccionActual.id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                mostrarMensajeExito("Eliminado correctamente.");
+            } else {
+                alert("Error: " + data.message);
+            }
+        });
     });
 
-    document.getElementById('btn-cancelar-edicion').addEventListener('click', function() {
+    function mostrarMensajeExito(msg) {
+        document.getElementById('mensaje-exito-modal').innerText = msg;
+        vistaBuscador.classList.add('d-none');
         vistaFormulario.classList.add('d-none');
-        vistaFinal.classList.remove('d-none');
-    });
-
-    // flujo final
-    function mostrarMensajeExito(mensaje) {
-        document.getElementById('mensaje-exito-modal').innerText = mensaje;
-        vistaListado.classList.add('d-none'); 
-        vistaFormulario.classList.add('d-none');
-        modalOtra.show();
+        new bootstrap.Modal(document.getElementById('modalOtraOperacion')).show();
+        
+        // Recargar al salir
+        document.getElementById('btn-si-otra').onclick = () => location.reload();
+        document.getElementById('btn-salir').onclick = () => location.reload();
     }
-
-    document.getElementById('btn-si-otra').addEventListener('click', function() {
-        modalOtra.hide();
-        renderizarTabla(); 
-        vistaListado.classList.remove('d-none');
-        document.querySelectorAll('.form-control').forEach(i => i.classList.remove('is-valid', 'is-invalid'));
-    });
-
-    document.getElementById('btn-salir').addEventListener('click', function() {
-        modalOtra.hide();
-        vistaFinal.classList.remove('d-none');
-    });
-
-    renderizarTabla();
 });
