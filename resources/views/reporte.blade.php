@@ -126,6 +126,8 @@
                         id="filtro-historico"
                         class="form-control"
                         placeholder="Escriba nombre o parte del nombre…"
+                        maxlength="50"
+                        pattern="[A-Za-z0-9\- ]*"
                     >
                 </div>
 
@@ -136,6 +138,8 @@
                         id="filtro-historico-semestre"
                         class="form-control"
                         placeholder="2025-2"
+                        maxlength="6"
+                        pattern="[0-9\-]*"
                     >
                 </div>
 

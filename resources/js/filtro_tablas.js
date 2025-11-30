@@ -1,5 +1,15 @@
 // resources/js/filtro_tablas.js
+const sanitizarTextoFiltro = (input) => {
+    input.value = input.value
+        .replace(/[^A-Za-z0-9\- ]/g, '')  // solo letras, números, espacio y -
+        .slice(0, 50);                     // máx 50
+};
 
+const sanitizarSemestreFiltro = (input) => {
+    input.value = input.value
+        .replace(/[^0-9\-]/g, '')  // solo dígitos y -
+        .slice(0, 6);              // máx 6
+};
 document.addEventListener('DOMContentLoaded', function () {
     console.log('filtro_tablas.js cargado en reporte');
 
@@ -20,19 +30,23 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectorTablas = input.dataset.tableFilter; // "#tabla-proyectos" o "#tabla-practicas"
 
         input.addEventListener('input', function () {
-            const query = normalizar(this.value.trim());
-            const tablas = document.querySelectorAll(selectorTablas);
+        // 1) limpiar el valor permitido
+        sanitizarTextoFiltro(this);
 
-            tablas.forEach((table) => {
-                const filas = table.querySelectorAll('tbody tr');
+        // 2) usar SIEMPRE el valor ya limpio
+        const query = normalizar(this.value.trim());
+        const tablas = document.querySelectorAll(selectorTablas);
 
-                filas.forEach((fila) => {
-                    const textoFila = normalizar(fila.textContent);
-                    const coincide = !query || textoFila.includes(query);
-                    fila.style.display = coincide ? '' : 'none';
-                });
+        tablas.forEach((table) => {
+            const filas = table.querySelectorAll('tbody tr');
+
+            filas.forEach((fila) => {
+                const textoFila = normalizar(fila.textContent);
+                const coincide = !query || textoFila.includes(query);
+                fila.style.display = coincide ? '' : 'none';
             });
         });
+    });
     });
 
     // =====================================================
@@ -49,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const tablasHistorico = document.querySelectorAll('.tabla-historico');
 
         const filtrarHistorico = () => {
+            
             const texto     = normalizar(inputHistorico.value.trim());
             const campo     = selectCampo ? selectCampo.value : 'todos'; // 'profesor' | 'alumno' | 'todos'
             const semestreQ = normalizar(inputSemestre?.value.trim() || '');
@@ -78,8 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             coincideTexto = valorAlumno.includes(texto);
                         } else if (campo === 'profesor') {
                             coincideTexto = valorProfesor.includes(texto);
-                        } else {
-                            // 'todos': profesor o alumno
+                        } else { // 'todos'
                             coincideTexto =
                                 valorAlumno.includes(texto) ||
                                 valorProfesor.includes(texto);
@@ -106,10 +120,55 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         };
 
-        // Disparar filtro al escribir/cambiar
-        inputHistorico.addEventListener('input', filtrarHistorico);
+        // 👉 Aquí es donde limpiamos ANTES y luego filtramos
+
+        // Texto (profesor/alumno/todos)
+        inputHistorico.addEventListener('input', () => {
+            sanitizarTextoFiltro(inputHistorico);   // limpia caracteres raros
+            filtrarHistorico();                     // filtra con el valor limpio
+        });
+
+        // Campo (select de profesor/alumno/todos)
         selectCampo?.addEventListener('change', filtrarHistorico);
-        inputSemestre?.addEventListener('input', filtrarHistorico);
+
+        // Semestre (solo números y guion, máx 6)
+        inputSemestre?.addEventListener('input', () => {
+            sanitizarSemestreFiltro(inputSemestre); // limpia caracteres raros
+            filtrarHistorico();                     // filtra con el valor limpio
+        });
+
+        // Rol (select)
         selectRol?.addEventListener('change', filtrarHistorico);
+    }
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Ejemplos: adapta los IDs a los tuyos reales
+
+    const txtHistorico = document.getElementById('filtro-historico');
+    if (txtHistorico) {
+        txtHistorico.addEventListener('input', () => {
+            sanitizarTextoFiltro(txtHistorico);
+            // aquí ya llamas a tu función de filtrar si quieres
+            // filtrarHistorico();
+        });
+    }
+
+    const semHistorico = document.getElementById('filtro-historico-semestre');
+    if (semHistorico) {
+        semHistorico.addEventListener('input', () => {
+            sanitizarSemestreFiltro(semHistorico);
+            // filtrarHistorico();
+        });
+    }
+
+    // Lo mismo para prácticas / proyectos si quieres:
+    const txtPrac = document.getElementById('filtro-prac-texto');
+    if (txtPrac) {
+        txtPrac.addEventListener('input', () => {
+            sanitizarTextoFiltro(txtPrac);
+            // filtrarPracticas();
+        });
     }
 });
