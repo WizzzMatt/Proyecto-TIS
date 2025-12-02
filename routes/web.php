@@ -4,6 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Profesor;
 use App\Models\Alumno;
 use App\Http\Controllers\HabilitacionController;
+use App\Http\Controllers\SimulacionUCSCController;
+
+Route::get(
+    '/simulacion/notas',
+    [SimulacionUCSCController::class, 'obtenerNotas']
+)->name('simulacion.notas');
 
 Route::get('/', function () {
     return view('indexPrincipal');
@@ -26,8 +32,14 @@ Route::get('/formulario', function () {
         'alumnos' => $alumnos
     ]);
 });
-
+// RUTAS F3
 Route::post('/registrar-habilitacion', [HabilitacionController::class, 'store']);
+
+Route::get('/editar_eliminar', [HabilitacionController::class, 'editarEliminar'])->name('habilitacion.editar_eliminar');
+
+Route::delete('/eliminar-habilitacion/{tipo}/{id}', [HabilitacionController::class, 'eliminar'])->name('habilitacion.eliminar');
+
+Route::put('/actualizar-habilitacion/{tipo}/{id}', [HabilitacionController::class, 'update'])->name('habilitacion.update');
 
 // --- RUTAS DE LISTADOS (R4) ---
 

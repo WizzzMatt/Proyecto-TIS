@@ -218,4 +218,148 @@ class HabilitacionController extends Controller
         // R4.10: Desplegar listado
         return view('reporte', compact('tipo', 'resultados', 'semestreBuscado'));
     }
+
+    // Funciones para R3: Editar y Eliminar Habilitaciones
+    public function editarEliminar()
+    {
+        // 1. Cargar proyectos
+        $proyectos = Proyecto::with(['alumno', 'profesorGuia', 'profesorComision', 'profesorCoguia'])->get();
+        
+        // 2. Cargar prácticas
+        $practicas = PracticaTutelada::with(['alumno', 'profesorTutor'])->get();
+
+        // 3. Cargar Profesores (ESTA ES LA LÍNEA QUE TE FALTA O ESTÁ FALLANDO)
+        $profesores = Profesor::orderBy('nombre_profesor')->get(); 
+
+        // 4. Pasarlos a la vista (ASEGÚRATE QUE 'profesores' ESTÉ AQUÍ)
+        return view('editar_eliminar', compact('proyectos', 'practicas', 'profesores'));
+    }
+
+    public function eliminar($tipo, $id)
+    {
+        try {
+            $eliminado = false;
+
+            if ($tipo === 'proyecto') {
+                // Buscamos el proyecto 
+                $item = Proyecto::findOrFail($id);
+                $item->delete();
+                $eliminado = true;
+            } elseif ($tipo === 'practica') {
+                $item = PracticaTutelada::findOrFail($id);
+                $item->delete();
+                $eliminado = true;
+            } else {
+                return response()->json(['success' => false, 'message' => 'Tipo de habilitación inválido.'], 400);
+            }
+
+            if ($eliminado) {
+                return response()->json(['success' => true, 'message' => 'Habilitación eliminada correctamente.']);
+            }
+
+        } catch (\Exception $e) {
+            // Error de base de datos o no encontrado
+            return response()->json(['success' => false, 'message' => 'Error al eliminar: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function update(Request $request, $tipo, $id)
+    {
+        try {
+            if ($tipo === 'proyecto') {
+                $proyecto = Proyecto::findOrFail($id);
+
+                // Recopilar datos
+                $profesorGuiaRut = (int)$request->input('profesor_guia_rut');
+                $profesorComisionRut = (int)$request->input('profesor_comision_rut');
+                
+                $profesorCoguiaRut = null;
+                // Si viene un valor distinto de "ninguno" o 0
+                if ($request->input('profesor_coguia_rut') && $request->input('profesor_coguia_rut') != 0) {
+                    $profesorCoguiaRut = (int)$request->input('profesor_coguia_rut');
+                }
+
+                // 2. Validaciones de Profesores 
+                if ($profesorGuiaRut === $profesorComisionRut) {
+                    return response()->json(['success' => false, 'message' => 'El Profesor Guía y el Profesor de Comisión no pueden ser la misma persona.'], 422);
+                }
+
+                if ($profesorCoguiaRut !== null) {
+                    if ($profesorCoguiaRut === $profesorGuiaRut) {
+                        return response()->json(['success' => false, 'message' => 'El Profesor Co-Guía no puede ser el mismo que el Profesor Guía.'], 422);
+                    }
+                    if ($profesorCoguiaRut === $profesorComisionRut) {
+                        return response()->json(['success' => false, 'message' => 'El Profesor Co-Guía no puede ser el mismo que el Profesor de Comisión.'], 422);
+                    }
+                }
+
+                // 3. Validador de Formato
+                $datosParaValidar = [
+                    'titulo' => $request->input('titulo'),
+                    'descripcion' => $request->input('descripcion'),
+                ];
+
+                $validacion = HabilProfValidator::validarProyecto($request->all());
+
+                if (!$validacion['ok']) {
+                    $errores = implode(' ', \Illuminate\Support\Arr::flatten($validacion['errors']));
+                    return response()->json(['success' => false, 'message' => 'Error de validación: ' . $errores], 422);
+                }
+
+                if ($proyecto->profesor_guia_rut !== $profesorGuiaRut) {
+                    $proyectosActivosGuia = Proyecto::where('profesor_guia_rut', $profesorGuiaRut)
+                                                    ->whereNull('nota_final')
+                                                    ->count();
+                    
+                    if ($proyectosActivosGuia >= 5) {
+                        return response()->json(['success' => false, 'message' => 'El nuevo Profesor Guía ya alcanzó su límite de 5 asignaciones.'], 422);
+                    }
+                }
+
+                //  Actualizar
+                $proyecto->update([
+                    'titulo' => $request->input('titulo'),
+                    'descripcion' => $request->input('descripcion'),
+                    'profesor_guia_rut' => $profesorGuiaRut,
+                    'profesor_comision_rut' => $profesorComisionRut,
+                    'profesor_coguia_rut' => $profesorCoguiaRut
+                ]);
+
+            } elseif ($tipo === 'practica') {
+                $practica = PracticaTutelada::findOrFail($id);
+
+                // Valida datos
+                $datosValidar = [
+                    'nombre_empresa'       => $request->input('nombre_empresa'),
+                    'nombre_supervisor'    => $request->input('nombre_supervisor'),
+                    'descripcion_practica' => $request->input('descripcion'), 
+                    'profesor_tutor_rut'   => (int)$request->input('profesor_tutor_rut'),
+                    'semestre_inicio'      => $practica->semestre_inicio, 
+                ];
+
+                $validacion = HabilProfValidator::validarPracticaTutelada($datosValidar);
+
+                if (!$validacion['ok']) {
+                    $errores = implode(' ', \Illuminate\Support\Arr::flatten($validacion['errors']));
+                    return response()->json(['success' => false, 'message' => 'Datos inválidos: ' . $errores], 422);
+                }
+
+                // Actualizar
+                $practica->update([
+                    'nombre_empresa' => $request->input('nombre_empresa'),
+                    'nombre_supervisor' => $request->input('nombre_supervisor'),
+                    'descripcion' => $request->input('descripcion'),
+                    'profesor_tutor_rut' => (int)$request->input('profesor_tutor_rut'),
+                ]);
+
+            } else {
+                return response()->json(['success' => false, 'message' => 'Tipo inválido.'], 400);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Habilitación actualizada correctamente.']);
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error interno: ' . $e->getMessage()], 500);
+        }
+    }
 }

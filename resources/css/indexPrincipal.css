@@ -5,10 +5,11 @@
     --color-titulo: #8B0000;
 }
 body {
-background-image: url('https://assets.isu.pub/document-structure/231005155434-da94a7ed3cd3feaac2cbe5b7b4bacc8e/v1/d6f81d05b8bcaf0dcc09bd9ead5f15d7.jpeg');
-background-repeat: no-repeat;
-background-size: cover;
-background-position: 50% px;
+    background-image: url('https://assets.isu.pub/document-structure/231005155434-da94a7ed3cd3feaac2cbe5b7b4bacc8e/v1/d6f81d05b8bcaf0dcc09bd9ead5f15d7.jpeg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 50% px;
+    background-attachment: fixed;      /* 🔥 hace que NO se mueva ni deforme */
 }
 
 /* La caja principal con el borde rojo */
