@@ -1,8 +1,33 @@
+# Sistema de gestión académica HabilProf UCSC
+
+Este proyecto fue desarrollado para optimizar el proceso de asignación, seguimiento y administración de los alumnos que estén cursando su habilitación profesional en la UCSC en distintas modalidades (Proyecto de título, Práctica profesional, Práctica tutelada)
+
+El objetivo es crear una plataforma integral que permita la administración de los datos de alumnos, profesores, ayudantes, tutores de práctica y otros datos relacionados a la habilitación profesional del estudiante como parte de su formación académica. Todo el  sistema fue diseñado teniendo en cuenta la fiabilidad y el rendimiento además de un fuerte enfoque en la usabilidad.
+
+---
+
+## Tecnologías usadas
+
+Laravel, MySQL, JavaScript, Blade, Composer (PHP), NPM (JS).
+
+---
+
+## Aprendisajes
+
+En este proyecto me vi enfrentado a desafíos técnicos, de gestión y de colaboración con mi grupo de trabajo.
+
+No solo buscamos que el sistema funcionara sino que fuera sencillo para el usuario entenderlo y utilizarlo. Nos enfocamos en la Integrabilidad y la funcionalidad.
+
+Aporté en la integración de código de mis compañeros. Gestioné conflictos de fusión, control de versiones, documentación y trabajo en equipo.
+
+
 # 🧩 Configuración del Proyecto Laravel
 
 Sigue estos pasos para preparar y ejecutar el proyecto correctamente en tu entorno local.
 
----
+---![8db34fcd-d454-49f6-a7ea-f682b8c2cb5b](https://github.com/user-attachments/assets/096086a3-233a-4734-85db-a177e78ac255)
+
+--- 
 
 ## ⚙️ 1. Configurar el archivo `.env`
 
