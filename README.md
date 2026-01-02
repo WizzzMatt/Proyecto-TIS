@@ -12,7 +12,7 @@ Laravel, MySQL, JavaScript, Blade, Composer (PHP), NPM (JS).
 
 ---
 
-## Aprendisajes
+## Aprendizajes
 
 En este proyecto me vi enfrentado a desafíos técnicos, de gestión y de colaboración con mi grupo de trabajo.
 
@@ -20,14 +20,20 @@ No solo buscamos que el sistema funcionara sino que fuera sencillo para el usuar
 
 Aporté en la integración de código de mis compañeros. Gestioné conflictos de fusión, control de versiones, documentación y trabajo en equipo.
 
+---
+---![8db34fcd-d454-49f6-a7ea-f682b8c2cb5b](https://github.com/user-attachments/assets/096086a3-233a-4734-85db-a177e78ac255)
+---![5299286e-f275-4adb-899c-98425259fe63](https://github.com/user-attachments/assets/99b64c13-6f6a-4349-b730-60b412aec5b4)
+---![0a2cf4f4-db2f-44c2-8912-4a35f2d51aad](https://github.com/user-attachments/assets/79a61096-bec3-49fa-b4c8-91841c76eb12)
+---![716b776d-2d80-45f9-9b35-7e1db0786d04](https://github.com/user-attachments/assets/6654c4f8-d6df-4f81-89ea-d5c2c6995dcf)
+
+
+
+
+---
 
 # 🧩 Configuración del Proyecto Laravel
 
 Sigue estos pasos para preparar y ejecutar el proyecto correctamente en tu entorno local.
-
----![8db34fcd-d454-49f6-a7ea-f682b8c2cb5b](https://github.com/user-attachments/assets/096086a3-233a-4734-85db-a177e78ac255)
-
---- 
 
 ## ⚙️ 1. Configurar el archivo `.env`
 
